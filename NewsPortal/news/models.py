@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.core.validators import MinValueValidator
+
 
 class Author(models.Model):
     authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -20,7 +22,10 @@ class Author(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=64, unique = True)
+    name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Post(models.Model):
@@ -49,6 +54,9 @@ class Post(models.Model):
 
     def preview(self):
         return self.text[0:123] + '...'
+
+    def __str__(self):
+        return f'{self.title}: {self.text[:20]}'
 
 
 class PostCategory(models.Model):
