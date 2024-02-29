@@ -1,12 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
-from django.core.validators import MinValueValidator
+from django.urls import reverse
 
 
 class Author(models.Model):
     authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
     ratingAuthor = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return self.authorUser.username
 
     def update_rating(self):
         postRat = self.post_set.aggregate(postRating=Sum('rating'))
@@ -57,6 +60,9 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.title}: {self.text[:20]}'
+
+    def get_absolute_url(self):
+        return reverse('post_detail', args=[str(self.id)])
 
 
 class PostCategory(models.Model):
