@@ -17,25 +17,41 @@ News
    </form>
 
    <hr>
-   {% if news %}
-       <table>
-           <tr>
-               <td>Заголовок новости</td>
-               <td>Дата публикации</td>
-               <td>Новость</td>
-           </tr>
-            {% for post in news %}
-           <tr>
-               <td>{{ post.title|censor }}</td>
-               <td>{{ post.dateCreation|date:'d.m.Y H:i' }}</td>
-               <td>{{ post.text|truncatewords:20|censor }}</td>
-           </tr>
-           {% endfor %}
 
-       </table>
-   {% else %}
-       <h2>Новостей нет!</h2>
-   {% endif %}
+    {% if perms.news.add_post %}
+    <a href="{% url 'post_create' %}">Добавить новость</a>
+    {% endif %}
+
+    {% if news %}
+        <table>
+            <tr>
+                <td>Заголовок новости</td>
+                <td>Дата публикации</td>
+                <td>Новость</td>
+                {% if perms.news.change_post %}
+                    <td>Действия</td>
+                {% endif %}
+            </tr>
+            {% for post in news %}
+            <tr>
+                <td>{{ post.title|censor }}</td>
+                <td>{{ post.dateCreation }}</td>
+                <td>{{ post.text|truncatewords:20|censor }}</td>
+                <td>
+                    {% if perms.news.change_post %}
+                        <a href="{% url 'post_edit' pk=post.id %}">Изменить</a>
+                    {% endif %}
+                    {% if perms.news.delete_post %}
+                        <a href="{% url 'post_delete' post.id %}">Удалить</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+    {% else %}
+        <h2>Новостей нет!</h2>
+    {% endif %}
 
    {# Информация о предыдущих страницах #}
    {% if page_obj.has_previous %}
