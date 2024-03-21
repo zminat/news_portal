@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
+from .tasks import send_new_post
 
 class PostsList(ListView):
     model = Post
@@ -65,6 +66,8 @@ class PostCreate(LoginRequiredMixin, CreateView):
             post.categoryType = 'NW'
         else:
             post.categoryType = 'AR'
+        post.save()
+        send_new_post.delay(post.pk)
         return super().form_valid(form)
 
 
