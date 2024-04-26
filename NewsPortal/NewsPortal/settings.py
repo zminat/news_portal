@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,6 +164,12 @@ EMAIL_SUBJECT_PREFIX = ''
 
 SERVER_EMAIL = ''
 
+ADMINS = (
+    ('Имя админа', 'электронка админа'),
+)
+
+MANAGERS = ADMINS
+
 SITE_URL = 'http://127.0.0.1:8000'
 
 ACCOUNT_EMAIL_REQUIRED = True
@@ -182,3 +191,126 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_IMPORTS = ('news',)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # Выводим время, уровень логирования, модуль, в котором возникло сообщение и само сообщение
+        'info_formatter': {
+            'format': '{asctime} {levelname} {module} {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        # Выводим время, уровень логирования и сообщение
+        'debug_formatter': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        # Выводим время, уровень логирования, путь к источнику события и сообщение
+        'warning_error_formatter': {
+            'format': '{asctime} {levelname}  {message}\nPath: {pathname}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        # Выводит время, уровень логирования, сообщение, путь к источнику события и стэк ошибки
+        'error_formatter': {
+            'format': '{asctime} {levelname} {message} \nPath: {pathname}\nError stack: {exc_info}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'handlers': {
+        # В консоль выводим все сообщения уровня DEBUG и выше.
+        'console_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'debug_formatter',
+            'filters': ['require_debug_true'],
+        },
+        # В консоль выводим все сообщения уровня WARNING и выше.
+        'console_warning': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'warning_error_formatter',
+            'filters': ['require_debug_true'],
+        },
+        # В консоль выводим все сообщения уровня ERROR и CRITICAL.
+        'console_error': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'error_formatter',
+            'filters': ['require_debug_true'],
+        },
+        # На почту отправляем сообщения уровней ERROR и выше.
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'warning_error_formatter',
+            'filters': ['require_debug_false'],
+        },
+        # В файл general.log выводим сообщения уровня INFO и выше.
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'info_formatter',
+            'filters': ['require_debug_false'],
+        },
+        # В файл errors.log выводим сообщения только уровня ERROR и CRITICAL.
+        'file_errors': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'error_formatter',
+        },
+        # Выводим сообщения в файл security.log.
+        'file_security': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'info_formatter',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins', 'file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['mail_admins', 'file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['file_security'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

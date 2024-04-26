@@ -15,6 +15,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from .tasks import send_new_post
 
+
 class PostsList(ListView):
     model = Post
     ordering = '-dateCreation'
